@@ -19,8 +19,10 @@
 - Domains:
   - `trade-test.hyperclaw.dev` (frontend + `/api` proxied to backend)
   - `api.trade-test.hyperclaw.dev` (direct backend/ws)
-- Reverse proxy: Caddy (`deploy/Caddyfile`)
+- Reverse proxy on server: `nginx` (ports 80/443 already occupied by host nginx)
+- Caddy exists in compose but is not active on this host due port conflict
 - Compose profile: base `docker-compose.yml` + `docker-compose.prod.yml`
+- Server working tree: `/opt/autotrade`, branch `main`
 
 ## Operator Notes
 - Wallet connect uses RainbowKit/wagmi.
@@ -29,3 +31,9 @@
   2. sign bind session
   3. approve agent
 - Current execution mode is `paper`/`paper-auto` (safe simulation).
+- `worker` DB URL is configurable via `WORKER_DATABASE_URL`; it must match DB password in `DATABASE_URL`.
+- Current prod `.env` uses:
+  - `POSTGRES_PASSWORD=HC_test_2026_secure`
+  - `DATABASE_URL=postgres://autotrade:HC_test_2026_secure@postgres:5432/autotrade?sslmode=disable`
+  - `WORKER_DATABASE_URL=postgresql+psycopg://autotrade:HC_test_2026_secure@postgres:5432/autotrade`
+- Cloudflare DNS records for the two domains are set to DNS only (`proxied=false`) pointing to `72.62.247.57`.
