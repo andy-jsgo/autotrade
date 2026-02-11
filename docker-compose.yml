@@ -33,7 +33,7 @@ services:
     build:
       context: ./python-worker
     environment:
-      DATABASE_URL: postgresql+psycopg://autotrade:autotrade@postgres:5432/autotrade
+      DATABASE_URL: ${WORKER_DATABASE_URL}
       HYPERLIQUID_API_BASE: ${HYPERLIQUID_API_BASE}
       COLLECTOR_POLL_SECONDS: ${COLLECTOR_POLL_SECONDS}
     depends_on:

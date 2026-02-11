@@ -23,6 +23,10 @@ cp deploy/.env.prod.example .env
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
+- Ensure both DB URLs are aligned to the same password:
+  - `DATABASE_URL` for Go backend
+  - `WORKER_DATABASE_URL` for Python worker (`postgresql+psycopg://...`)
+
 - Caddy routes:
   - `trade-test.hyperclaw.dev` -> frontend (`/api/*` proxied to backend)
   - `api.trade-test.hyperclaw.dev` -> backend
