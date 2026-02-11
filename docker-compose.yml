@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend-go
+    environment:
+      GO_PORT: ${GO_PORT}
+      GO_WS_PORT: ${GO_WS_PORT}
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${GO_PORT}:${GO_PORT}"
+      - "${GO_WS_PORT}:${GO_WS_PORT}"
+
+  worker:
+    build:
+      context: ./python-worker
+    environment:
+      DATABASE_URL: postgresql+psycopg://autotrade:autotrade@postgres:5432/autotrade
+      HYPERLIQUID_API_BASE: ${HYPERLIQUID_API_BASE}
+      COLLECTOR_POLL_SECONDS: ${COLLECTOR_POLL_SECONDS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      API_BASE_INTERNAL: ${API_BASE_INTERNAL}
+      NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE}
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:

@@ -1,0 +1,13 @@
+.env
+**/.DS_Store
+
+backend-go/.gocache
+backend-go/.gomodcache
+backend-go/bin
+
+frontend/.next
+frontend/node_modules
+
+python-worker/.venv
+
+*.log
