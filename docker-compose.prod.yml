@@ -1,0 +1,35 @@
+services:
+  postgres:
+    ports: []
+
+  backend:
+    ports: []
+
+  frontend:
+    build:
+      args:
+        NEXT_PUBLIC_API_BASE: /api
+        NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: ${NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID}
+    ports: []
+    environment:
+      API_BASE_INTERNAL: http://backend:8080
+      NEXT_PUBLIC_API_BASE: /api
+
+  caddy:
+    image: caddy:2.10-alpine
+    depends_on:
+      - frontend
+      - backend
+    environment:
+      CADDY_EMAIL: ${CADDY_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

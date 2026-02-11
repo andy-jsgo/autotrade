@@ -62,9 +62,43 @@ func Migrate(ctx context.Context, pool *pgxpool.Pool) error {
 		`CREATE TABLE IF NOT EXISTS control_state (
 			id SMALLINT PRIMARY KEY,
 			bias TEXT NOT NULL,
+			auto_trading BOOLEAN NOT NULL DEFAULT false,
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 		);`,
+		`ALTER TABLE control_state ADD COLUMN IF NOT EXISTS auto_trading BOOLEAN NOT NULL DEFAULT false;`,
+		`CREATE TABLE IF NOT EXISTS wallet_sessions (
+			id BIGSERIAL PRIMARY KEY,
+			address TEXT NOT NULL,
+			connected BOOLEAN NOT NULL DEFAULT true,
+			agent_approved BOOLEAN NOT NULL DEFAULT false,
+			agent_pub_key TEXT NOT NULL DEFAULT '',
+			signature TEXT NOT NULL DEFAULT '',
+			message TEXT NOT NULL DEFAULT '',
+			updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+		);`,
+		`CREATE TABLE IF NOT EXISTS strategy_runtime (
+			id SMALLINT PRIMARY KEY,
+			runtime_status TEXT NOT NULL DEFAULT 'idle',
+			last_signal TEXT NOT NULL DEFAULT '',
+			last_error TEXT NOT NULL DEFAULT '',
+			updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+		);`,
+		`CREATE TABLE IF NOT EXISTS orders (
+			id BIGSERIAL PRIMARY KEY,
+			symbol TEXT NOT NULL,
+			side TEXT NOT NULL,
+			order_type TEXT NOT NULL,
+			size DOUBLE PRECISION NOT NULL,
+			entry_price DOUBLE PRECISION NOT NULL,
+			stop_loss DOUBLE PRECISION NOT NULL,
+			take_profit DOUBLE PRECISION NOT NULL,
+			status TEXT NOT NULL DEFAULT 'open',
+			execution TEXT NOT NULL DEFAULT 'paper',
+			client_tag TEXT NOT NULL DEFAULT '',
+			created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+		);`,
 		`INSERT INTO control_state (id, bias) VALUES (1, 'Hybrid') ON CONFLICT (id) DO NOTHING;`,
+		`INSERT INTO strategy_runtime (id) VALUES (1) ON CONFLICT (id) DO NOTHING;`,
 	}
 
 	for _, statement := range statements {

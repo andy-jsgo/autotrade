@@ -1,0 +1,21 @@
+{$CADDY_EMAIL}
+
+trade-test.hyperclaw.dev {
+  encode gzip
+
+  handle_path /api/* {
+    reverse_proxy backend:8080
+  }
+
+  reverse_proxy frontend:3000
+}
+
+api.trade-test.hyperclaw.dev {
+  encode gzip
+
+  handle_path /ws/* {
+    reverse_proxy backend:8081
+  }
+
+  reverse_proxy backend:8080
+}

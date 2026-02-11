@@ -4,6 +4,7 @@ import os
 
 from collector.engine import CollectorEngine
 from derivation.engine import DerivationEngine
+from trader.engine import TraderEngine
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -19,10 +20,12 @@ async def run_forever() -> None:
 
     collector = CollectorEngine(db_url=db_url, api_base=api_base, poll_seconds=poll_seconds)
     derivation = DerivationEngine(db_url=db_url)
+    trader = TraderEngine(db_url=db_url)
 
     await asyncio.gather(
         collector.loop(),
         derivation.loop(),
+        trader.loop(),
     )
 
 
